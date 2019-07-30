@@ -1,0 +1,127 @@
+{
+	"ret": 1,
+    "apiver": 9,
+	"name": "AMQ",
+	"version": "0.0.1",
+	"version_id": 1,
+	"author": "fortunewang",
+	"description": "AMQP adapter for CoolQ",
+	"event": [
+        // {
+        //     "id": 1001,
+        //     "type": 1001,
+        //     "name": "system started",
+        //     "priority": 20000,
+        //     "function": "app_on_startup"
+        // },
+        // {
+        //     "id": 1002,
+        //     "type": 1002,
+        //     "name": "system exit",
+        //     "priority": 20000,
+        //     "function": "app_on_exit"
+        // },
+        {
+            "id": 1003,
+            "type": 1003,
+            "name": "app enabled",
+            "priority": 20000,
+            "function": "app_on_enabled"
+        },
+        {
+            "id": 1004,
+            "type": 1004,
+            "name": "app disable",
+            "priority": 20000,
+            "function": "app_on_disable"
+        },
+        {
+            "id": 21,
+            "type": 21,
+            "name": "private message",
+            "priority": 20000,
+            "function": "app_on_private_message"
+        },
+        {
+            "id": 2,
+            "type": 2,
+            "name": "groupmessage",
+            "priority": 20000,
+            "function": "app_on_group_message"
+        },
+        {
+            "id": 4,
+            "type": 4,
+            "name": "discuss message",
+            "priority": 20000,
+            "function": "app_on_discuss_message"
+        }
+        // {
+        //     "id": 101,
+        //     "type": 101,
+        //     "name": "group admin changed",
+        //     "priority": 20000,
+        //     "function": "app_on_group_admin_changed"
+        // },
+        // {
+        //     "id": 102,
+        //     "type": 102,
+        //     "name": "group member decrease",
+        //     "priority": 20000,
+        //     "function": "app_on_group_member_decrease"
+        // },
+        // {
+        //     "id": 103,
+        //     "type": 103,
+        //     "name": "group member increase",
+        //     "priority": 20000,
+        //     "function": "app_on_group_member_increase"
+        // },
+        // {
+        //     "id": 201,
+        //     "type": 201,
+        //     "name": "friend added",
+        //     "priority": 20000,
+        //     "function": "app_on_friend_added"
+        // },
+        // {
+        //     "id": 301,
+        //     "type": 301,
+        //     "name": "friend request",
+        //     "priority": 20000,
+        //     "function": "app_on_friend_request"
+        // },
+        // {
+        //     "id": 302,
+        //     "type": 302,
+        //     "name": "group request",
+        //     "priority": 20000,
+        //     "function": "app_on_group_request"
+        // }
+    ],
+    "auth": [
+    	// 20, // getCookies / getCsrfToken
+        // 30, // getRecord
+        101, // sendGroupMsg
+        103, // sendDiscussMsg
+        106, // sendPrivateMsg
+        // 110, // sendLikeV2 / sendLike
+        // 120, // setGroupKick
+        // 121, // setGroupBan
+        // 122, // setGroupAdmin
+        // 123, // setGroupWholeBan
+        // 124, // setGroupAnonymousBan
+        // 125, // setGroupAnonymous
+        // 126, // setGroupCard
+        // 127, // setGroupLeave
+        // 128, // setGroupSpecialTitle
+        // 130, // getGroupMemberInfoV2 / getGroupMemberInfo
+        // 131, // getStrangerInfo
+        // 140, // setDiscussLeave
+        // 150, // setFriendAddRequest
+        // 151, // setGroupAddRequest
+        160, // getGroupMemberList
+        161, // getGroupList
+        180 // deleteMsg
+    ]
+}

@@ -1,0 +1,15 @@
+[package]
+name = "cqrs"
+version = "0.1.0"
+authors = ["fortunewang <fortunewang@qq.com>"]
+edition = "2018"
+
+[dependencies]
+encoding = "0.2"
+
+[dependencies.winapi]
+version = "0.3.7"
+features = ["std", "libloaderapi"]
+
+[lib]
+name = "cqrs"
