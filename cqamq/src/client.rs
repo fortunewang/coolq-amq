@@ -210,7 +210,10 @@ impl AMQPClient {
 
         let queue = channel.queue_declare(
             "",
-            options::QueueDeclareOptions::default(),
+            options::QueueDeclareOptions {
+                exclusive: true,
+                ..options::QueueDeclareOptions::default()
+            },
             FieldTable::default()
         ).wait()?;
 
