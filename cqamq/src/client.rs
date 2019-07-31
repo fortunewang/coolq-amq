@@ -68,7 +68,7 @@ impl RPCSubscriber {
                     options::BasicPublishOptions::default(),
                     serde_json::to_vec(&res)?,
                     props
-                ).wait()?;
+                ).as_error()?;
             },
             None => {},
         }
@@ -102,7 +102,7 @@ impl RPCSubscriber {
                     options::BasicPublishOptions::default(),
                     serde_json::to_vec(&res)?,
                     props
-                ).wait()?;
+                ).as_error()?;
             },
             None => {},
         }
@@ -136,7 +136,7 @@ impl RPCSubscriber {
                     options::BasicPublishOptions::default(),
                     serde_json::to_vec(&res)?,
                     props
-                ).wait()?;
+                ).as_error()?;
             },
             None => {},
         }
