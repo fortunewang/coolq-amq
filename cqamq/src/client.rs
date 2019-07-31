@@ -224,7 +224,7 @@ impl AMQPClient {
         ).wait()?;
 
         channel.basic_consume(
-            &queue, "my_consumer",
+            &queue, "",
             options::BasicConsumeOptions::default(),
             FieldTable::default()
         ).wait()?.set_delegate(Box::new(RPCSubscriber {
