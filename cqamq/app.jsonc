@@ -55,14 +55,14 @@
             "name": "discuss message",
             "priority": 20000,
             "function": "app_on_discuss_message"
-        }
-        // {
-        //     "id": 101,
-        //     "type": 101,
-        //     "name": "group admin changed",
-        //     "priority": 20000,
-        //     "function": "app_on_group_admin_changed"
-        // },
+        },
+        {
+            "id": 101,
+            "type": 101,
+            "name": "group admin changed",
+            "priority": 20000,
+            "function": "app_on_group_admin_changed"
+        },
         // {
         //     "id": 102,
         //     "type": 102,
@@ -70,13 +70,13 @@
         //     "priority": 20000,
         //     "function": "app_on_group_member_decrease"
         // },
-        // {
-        //     "id": 103,
-        //     "type": 103,
-        //     "name": "group member increase",
-        //     "priority": 20000,
-        //     "function": "app_on_group_member_increase"
-        // },
+        {
+            "id": 103,
+            "type": 103,
+            "name": "group member increase",
+            "priority": 20000,
+            "function": "app_on_group_member_increase"
+        }
         // {
         //     "id": 201,
         //     "type": 201,

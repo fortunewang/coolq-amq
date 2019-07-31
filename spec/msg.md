@@ -16,3 +16,16 @@
     discuss : number
     from : number
     message : string
+
+## group_admin_changed
+
+    group : number
+    operand : number
+    set : true | false
+
+## group_member_increase
+
+    group : number
+    from : number
+    operator : number
+    invited : true | false

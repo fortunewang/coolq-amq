@@ -85,3 +85,59 @@ pub extern "stdcall" fn app_on_discuss_message(_subtype: i32, _msgid: i32,
     }
     return cqrs::EventResultCode::Ignore as i32;
 }
+
+#[no_mangle]
+pub extern "stdcall" fn app_on_group_admin_changed(subtype: i32, _sendtime: i32,
+    from_group: i64, being_operate_qq: i64) -> i32 {
+    if let Some(client) = unsafe { G_CLIENT.as_ref() } {
+        match subtype {
+            1 => {
+                let msg = crate::message::GroupAdminChanged {
+                    group: from_group,
+                    operand: being_operate_qq,
+                    set: false,
+                };
+                client.send_message("group_admin_changed", serde_json::to_vec(&msg).unwrap());
+            },
+            2 => {
+                let msg = crate::message::GroupAdminChanged {
+                    group: from_group,
+                    operand: being_operate_qq,
+                    set: true,
+                };
+                client.send_message("group_admin_changed", serde_json::to_vec(&msg).unwrap());
+            },
+            _ => {},
+        }
+    }
+    return cqrs::EventResultCode::Ignore as i32;
+}
+
+#[no_mangle]
+pub extern "stdcall" fn app_on_group_member_increase(subtype: i32, _sendtime: i32,
+    from_group: i64, from_qq: i64, being_operate_qq: i64) -> i32 {
+    if let Some(client) = unsafe { G_CLIENT.as_ref() } {
+        match subtype {
+            1 => {
+                let msg = crate::message::GroupMemberIncrease {
+                    group: from_group,
+                    from: being_operate_qq,
+                    operator: from_qq,
+                    invited: false,
+                };
+                client.send_message("group_member_increase", serde_json::to_vec(&msg).unwrap());
+            },
+            2 => {
+                let msg = crate::message::GroupMemberIncrease {
+                    group: from_group,
+                    from: being_operate_qq,
+                    operator: from_qq,
+                    invited: true,
+                };
+                client.send_message("group_member_increase", serde_json::to_vec(&msg).unwrap());
+            },
+            _ => {},
+        }
+    }
+    return cqrs::EventResultCode::Ignore as i32;
+}
