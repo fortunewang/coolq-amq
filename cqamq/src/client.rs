@@ -14,34 +14,37 @@ struct RPCSubscriber {
 
 impl RPCSubscriber {
 
-    pub fn dispatch(&self, delivery: &Delivery, payload: serde_json::Value) -> Fallible<()> {
+    pub fn dispatch(&self, delivery: &Delivery) -> Fallible<Vec<u8>> {
+        let payload = serde_json::from_slice::<serde_json::Value>(&delivery.data)?;
+        let payload = payload.as_object()
+            .ok_or(err_msg("payload is not a object"))?;
         let api = payload.get("api")
             .ok_or(err_msg("payload.api is required"))?
             .as_str()
             .ok_or(err_msg("payload.api is not a string"))?;
         let params = payload.get("params");
-        match api {
+        let res = match api {
             "send_private_message" => {
-                self.send_private_message(delivery,
+                self.send_private_message(
                     params.ok_or(err_msg("payload.params is required by send_private_message"))?
-                )?;
+                )?
             },
             "send_group_message" => {
-                self.send_group_message(delivery,
+                self.send_group_message(
                     params.ok_or(err_msg("payload.params is required by send_group_message"))?
-                )?;
+                )?
             },
             "send_discuss_message" => {
-                self.send_discuss_message(delivery,
+                self.send_discuss_message(
                     params.ok_or(err_msg("payload.params is required by send_discuss_message"))?
-                )?;
+                )?
             },
             _ => return Err(err_msg("invalid api")),
-        }
-        Ok(())        
+        };
+        Ok(res)
     }
 
-    fn send_private_message(&self, delivery: &Delivery, params: &serde_json::Value) -> Fallible<()> {
+    fn send_private_message(&self, params: &serde_json::Value) -> Fallible<Vec<u8>> {
         let qq = params.get("to")
             .ok_or(err_msg("payload.params.to is required by send_private_message"))?
             .as_i64()
@@ -53,29 +56,11 @@ impl RPCSubscriber {
         unsafe {
             self.cqp.send_private_msg(self.auth_code, qq, gb18030!(message));
         }
-        match delivery.properties.reply_to() {
-            Some(queue_name) => {
-                let res = crate::message::SendPrivateMessageResponse { ok: true };
-                let props = match delivery.properties.correlation_id() {
-                    Some(correlation_id) => {
-                        lapin::BasicProperties::default()
-                            .with_correlation_id(correlation_id.clone())
-                    },
-                    None => lapin::BasicProperties::default(),
-                };
-                self.channel.basic_publish(
-                    "", queue_name.as_str(),
-                    options::BasicPublishOptions::default(),
-                    serde_json::to_vec(&res)?,
-                    props
-                ).as_error()?;
-            },
-            None => {},
-        }
-        Ok(())
+        let res = crate::message::SendPrivateMessageResponse { ok: true };
+        Ok(serde_json::to_vec(&res)?)
     }
 
-    fn send_group_message(&self, delivery: &Delivery, params: &serde_json::Value) -> Fallible<()> {
+    fn send_group_message(&self, params: &serde_json::Value) -> Fallible<Vec<u8>> {
         let group = params.get("group")
             .ok_or(err_msg("payload.params.group is required by send_group_message"))?
             .as_i64()
@@ -87,29 +72,11 @@ impl RPCSubscriber {
         unsafe {
             self.cqp.send_group_msg(self.auth_code, group, gb18030!(message));
         }
-        match delivery.properties.reply_to() {
-            Some(queue_name) => {
-                let res = crate::message::SendGroupMessageResponse { ok: true };
-                let props = match delivery.properties.correlation_id() {
-                    Some(correlation_id) => {
-                        lapin::BasicProperties::default()
-                            .with_correlation_id(correlation_id.clone())
-                    },
-                    None => lapin::BasicProperties::default(),
-                };
-                self.channel.basic_publish(
-                    "", queue_name.as_str(),
-                    options::BasicPublishOptions::default(),
-                    serde_json::to_vec(&res)?,
-                    props
-                ).as_error()?;
-            },
-            None => {},
-        }
-        Ok(())
+        let res = crate::message::SendGroupMessageResponse { ok: true };
+        Ok(serde_json::to_vec(&res)?)
     }
 
-    fn send_discuss_message(&self, delivery: &Delivery, params: &serde_json::Value) -> Fallible<()> {
+    fn send_discuss_message(&self, params: &serde_json::Value) -> Fallible<Vec<u8>> {
         let discuss = params.get("discuss")
             .ok_or(err_msg("payload.params.discuss is required by send_discuss_message"))?
             .as_i64()
@@ -121,49 +88,42 @@ impl RPCSubscriber {
         unsafe {
             self.cqp.send_discuss_msg(self.auth_code, discuss, gb18030!(message));
         }
-        match delivery.properties.reply_to() {
-            Some(queue_name) => {
-                let res = crate::message::SendDiscussMessageResponse { ok: true };
-                let props = match delivery.properties.correlation_id() {
-                    Some(correlation_id) => {
-                        lapin::BasicProperties::default()
-                            .with_correlation_id(correlation_id.clone())
-                    },
-                    None => lapin::BasicProperties::default(),
-                };
-                self.channel.basic_publish(
-                    "", queue_name.as_str(),
-                    options::BasicPublishOptions::default(),
-                    serde_json::to_vec(&res)?,
-                    props
-                ).as_error()?;
-            },
-            None => {},
-        }
-        Ok(())
+        let res = crate::message::SendDiscussMessageResponse { ok: true };
+        Ok(serde_json::to_vec(&res)?)
     }
 
 }
 
 impl ConsumerDelegate for RPCSubscriber {
   fn on_new_delivery(&self, delivery: Delivery) {
-    match serde_json::from_slice::<serde_json::Value>(&delivery.data) {
-        Ok(payload) => {
-            if payload.is_object() {
-                match self.dispatch(&delivery, payload) {
-                    Ok(_) => {},
-                    Err(_e) => {},
-                }
-            } else {
-                // payload is not a object
+    match self.dispatch(&delivery) {
+        Ok(res) => {
+            match delivery.properties.reply_to() {
+                Some(queue_name) => {
+                    let props = match delivery.properties.correlation_id() {
+                        Some(correlation_id) => {
+                            lapin::BasicProperties::default()
+                                .with_correlation_id(correlation_id.clone())
+                        },
+                        None => lapin::BasicProperties::default(),
+                    };
+                    self.channel.basic_publish(
+                        "", queue_name.as_str(),
+                        options::BasicPublishOptions::default(),
+                        res,
+                        props
+                    ).as_error().expect("rpc response failed");
+                },
+                None => {},
             }
+            self.channel.basic_ack(delivery.delivery_tag, options::BasicAckOptions::default())
+                .as_error().expect("basic_ack failed");
         },
         Err(_e) => {
-            // payload is not JSON formatted
+            self.channel.basic_reject(delivery.delivery_tag, options::BasicRejectOptions::default())
+                .as_error().expect("basic_reject failed");
         },
     }
-    self.channel.basic_ack(delivery.delivery_tag, options::BasicAckOptions::default())
-        .as_error().expect("basic_ack failed");
   }
 }
 
