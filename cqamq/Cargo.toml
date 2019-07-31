@@ -1,5 +1,5 @@
 [package]
-name = "cqamp"
+name = "cqamq"
 version = "0.1.0"
 authors = ["fortunewang <fortunewang@qq.com>"]
 edition = "2018"
@@ -14,5 +14,5 @@ toml = "0.5.1"
 cqrs = { path = "../cqrs" }
 
 [lib]
-name = "cqamp"
+name = "cqamq"
 crate-type = ["cdylib"]
