@@ -3,6 +3,7 @@ use lapin::uri::AMQPUri;
 
 pub struct Config {
     pub uri: AMQPUri,
+    pub connection_timeout: u64,
 }
 
 pub fn read_config(app_dir: &str) -> Fallible<Config> {
@@ -10,6 +11,7 @@ pub fn read_config(app_dir: &str) -> Fallible<Config> {
 
     let mut config = Config {
         uri: AMQPUri::default(),
+        connection_timeout: 10,
     };
 
     let config_path = Path::new(app_dir).join("config.toml");
@@ -28,7 +30,7 @@ pub fn read_config(app_dir: &str) -> Fallible<Config> {
     }
     if let Some(port) = options.get("port") {
         config.uri.authority.port = port.as_integer()
-            .ok_or(err_msg("config 'host' is not a integer"))?
+            .ok_or(err_msg("config 'host' is not an integer"))?
             as u16;
     }
     if let Some(username) = options.get("username") {
@@ -45,6 +47,11 @@ pub fn read_config(app_dir: &str) -> Fallible<Config> {
         config.uri.vhost = vhost.as_str()
             .ok_or(err_msg("config 'vhost' is not a string"))?
             .to_owned();
+    }
+    if let Some(connection_timeout) = options.get("connection_timeout") {
+        config.connection_timeout = connection_timeout.as_integer()
+            .ok_or(err_msg("config 'connection_timeout' is not an integer"))?
+            as u64;
     }
     return Ok(config);
 }

@@ -151,7 +151,17 @@ impl AMQPClient {
     }
 
     fn try_init(&mut self, config: &crate::config::Config) -> Fallible<()> {
-        let conn = Connection::connect_uri(config.uri.clone(), ConnectionProperties::default()).wait()?;
+        let wait = Connection::connect_uri(config.uri.clone(), ConnectionProperties::default());
+        let now = std::time::Instant::now();
+        let conn = loop {
+            if let Some(conn) = wait.try_wait() {
+                break conn;
+            }
+            if now.elapsed().as_secs() >= config.connection_timeout {
+                return Err(err_msg("无法连接到服务器"));
+            }
+            std::thread::sleep(std::time::Duration::from_millis(500));
+        }?;
         let channel = conn.create_channel().wait()?;
 
         channel.exchange_declare(
