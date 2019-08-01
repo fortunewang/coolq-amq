@@ -150,7 +150,7 @@ impl AMQPClient {
         })
     }
 
-    fn try_connect(&mut self, config: &crate::config::Config) -> Fallible<()> {
+    fn try_init(&mut self, config: &crate::config::Config) -> Fallible<()> {
         let conn = Connection::connect_uri(config.uri.clone(), ConnectionProperties::default()).wait()?;
         let channel = conn.create_channel().wait()?;
 
@@ -215,19 +215,19 @@ impl AMQPClient {
             self.cqp.add_log(self.auth_code,
                 cqrs::LogLevel::Info as i32,
                 gb18030!("INFO"),
-                gb18030!("连接至服务器: {}@{}:{}, vhost = {}",
+                gb18030!("正在初始化，服务器: {}@{}:{}, vhost = {}",
                     config.uri.authority.userinfo.username,
                     config.uri.authority.host,
                     config.uri.authority.port,
                     config.uri.vhost));
         }
-        match self.try_connect(&config) {
+        match self.try_init(&config) {
             Ok(_) => {
                 unsafe {
                     self.cqp.add_log(self.auth_code,
                         cqrs::LogLevel::Info as i32,
                         gb18030!("INFO"),
-                        gb18030!("服务器连接成功"));
+                        gb18030!("初始化成功"));
                 }
             },
             Err(e) => {
@@ -235,7 +235,7 @@ impl AMQPClient {
                     self.cqp.add_log(self.auth_code,
                         cqrs::LogLevel::Error as i32,
                         gb18030!("ERROR"),
-                        gb18030!("服务器连接失败: {}", e));
+                        gb18030!("初始化失败: {}", e));
                 }
             },
         }
