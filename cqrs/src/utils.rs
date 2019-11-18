@@ -14,15 +14,15 @@ impl<T> From<T> for UnicodeEncodeError where T: std::string::ToString {
 }
 
 #[inline]
-pub fn gb18030_encode(src: &str) -> Result<*mut c_char, UnicodeEncodeError> {
+pub fn gb18030_encode(src: &str) -> Result<CString, UnicodeEncodeError> {
     let encoded = GB18030.encode(src, EncoderTrap::Ignore)?;
-    Ok(CString::new(encoded)?.into_raw())
+    Ok(CString::new(encoded)?)
 }
 
 #[macro_export]
 macro_rules! gb18030 {
-    ($fmt: expr) => { cqrs::gb18030_encode($fmt).unwrap() };
-    ($fmt: expr, $($args: tt)*) => { cqrs::gb18030_encode(&format!($fmt, $($args)*)).unwrap() }
+    ($fmt: expr) => { cqrs::gb18030_encode($fmt).unwrap().as_c_str().as_ptr() };
+    ($fmt: expr, $($args: tt)*) => { cqrs::gb18030_encode(&format!($fmt, $($args)*)).unwrap().as_c_str().as_ptr() }
 }
 
 #[inline]
